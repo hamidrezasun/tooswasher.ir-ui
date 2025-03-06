@@ -1,17 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css, keyframes } from '@emotion/react';
 
-export const slideDown = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
 export const navbarStyles = css`
   position: fixed;
   top: 0;
@@ -40,12 +29,6 @@ export const logoStyles = css`
   transition: color 0.3s ease;
 `;
 
-export const searchContainerStyles = css`
-  position: relative;
-  flex-grow: 1;
-  max-width: 600px;
-`;
-
 export const searchStyles = css`
   width: 100%;
   padding: 0.75rem 1.25rem;
@@ -56,17 +39,6 @@ export const searchStyles = css`
   &:focus {
     border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-  }
-`;
-
-export const searchButtonStyles = css`
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  background: #2563eb;
-  color: white;
-  transition: all 0.3s ease;
-  &:hover {
-    background: #1e40af;
   }
 `;
 
@@ -84,6 +56,9 @@ export const buttonBase = css`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.875rem;
+  min-width: 100px;
+  justify-content: center;
 `;
 
 export const loginButtonStyles = css`
