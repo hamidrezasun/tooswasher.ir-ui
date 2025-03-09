@@ -1,97 +1,47 @@
 import axios from 'axios';
-import qs from 'qs';
+import { getToken } from './auth';
 
-const API_BASE_URL = 'http://192.168.1.37:8008/';
+const API_URL = 'http://192.168.1.37:8008';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  },
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-export const loginUser = async (credentials) => {
-  try {
-    const response = await api.post(
-      '/users/token',
-      qs.stringify({
-        username: credentials.username,
-        password: credentials.password,
-        grant_type: 'password',
-      })
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { detail: 'Login failed' };
-  }
+const setAuthToken = (token) => {
+  if (token) api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  else delete api.defaults.headers.common['Authorization'];
 };
 
-export const registerUser = async (userData) => {
-  try {
-    const response = await api.post('/users/register', userData, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { detail: 'Registration failed' };
-  }
-};
+const token = getToken();
+if (token) setAuthToken(token);
 
-export const getUserProfile = async () => {
-  try {
-    const response = await api.get('/users/me');
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { detail: 'Failed to fetch profile' };
-  }
-};
+export const loginForAccessToken = async (formData) => (await api.post('/users/token', formData, {
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+})).data;
 
-export const getPages = async () => {
-  try {
-    const response = await api.get('/pages/', {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data; // Array of { id, name, is_in_menu }
-  } catch (error) {
-    throw error.response?.data || { detail: 'Failed to fetch pages' };
-  }
-};
+export const registerUser = async (userData) => (await api.post('/users/register', userData)).data;
+export const getUserProfile = async () => (await api.get('/users/me')).data;
+export const getProducts = async () => (await api.get('/products/')).data;
+export const getProductById = async (id) => (await api.get(`/products/${id}`)).data;
+export const createProduct = async (data) => (await api.post('/products/', data)).data;
+export const updateProduct = async (id, data) => (await api.put(`/products/${id}`, data)).data;
+export const deleteProduct = async (id) => await api.delete(`/products/${id}`);
+export const addToCart = async (productId, quantity) => (await api.post('/cart/', { product_id: productId, quantity })).data;
+export const getCart = async () => (await api.get('/cart/')).data;
+export const getCategoryById = async (id) => (await api.get(`/categories/${id}`)).data;
+export const getCategories = async () => (await api.get('/categories/')).data; // Added this line
+export const getPages = async () => (await api.get('/pages/')).data;
+export const getDiscounts = async () => (await api.get('/discounts/')).data;
+export const createDiscount = async (data) => (await api.post('/discounts/', data)).data;
+export const updateDiscount = async (id, data) => (await api.put(`/discounts/${id}`, data)).data;
+export const deleteDiscount = async (id) => await api.delete(`/discounts/${id}`);
+export const getEvents = async () => (await api.get('/events/')).data;
+export const getEventById = async (id) => (await api.get(`/events/${id}`)).data;
+export const createEvent = async (data) => (await api.post('/events/', data)).data;
+export const updateEvent = async (id, data) => (await api.put(`/events/${id}`, data)).data;
+export const deleteEvent = async (id) => await api.delete(`/events/${id}`);
+export const getEventActivities = async (eventId) => (await api.get(`/events/${eventId}/activities/`)).data;
+export const createEventActivity = async (eventId, data) => (await api.post(`/events/${eventId}/activities/`, data)).data;
 
-
-export const getPageByName = async (pageName) => {
-  try {
-    const pages = await getPages();
-    const page = pages.find((p) => p.name.toLowerCase().replace(/\s+/g, '-') === pageName);
-    if (!page) throw new Error('Page not found');
-    const response = await api.get(`/pages/${page.id}`, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { detail: 'Failed to fetch page' };
-  }
-};
-
-export const getCategories = async () => {
-  try {
-    const response = await api.get('/categories/', {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data; // Array of { id, name, description, parent_id, subcategories }
-  } catch (error) {
-    throw error.response?.data || { detail: 'Failed to fetch categories' };
-  }
-};
-
-export default api;
+export default { setAuthToken };

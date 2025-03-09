@@ -1,15 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-const containerStyles = css`
+import { css, keyframes } from '@emotion/react';
+export const containerStyles = css`
   min-height: 100vh;
   background-color: #f3f4f6; /* Light background for visibility */
   padding-top: 135px; /* Explicitly set to 10rem in px */
