@@ -3,8 +3,8 @@ import { css } from '@emotion/react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getEvents, createEvent } from '../api/api';
-import {containerStyles} from './style';
+import { getEvents, createEvent, createEventActivity } from '../api/api';
+import { containerStyles } from './style';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -23,6 +23,18 @@ const Events = () => {
       setEvents([...events, newEvent]);
     } catch (err) {
       setError(err.message || 'خطا در افزودن رویداد');
+    }
+  };
+
+  const handleEventActivity = async (eventId) => {
+    try {
+      await createEventActivity(eventId, { content: 'فعالیت جدید', important: false });
+      console.log(`Activity created for event ${eventId}`);
+      // Optionally refresh events to reflect the new activity
+      const updatedEvents = await getEvents();
+      setEvents(updatedEvents);
+    } catch (err) {
+      setError(err.message || 'خطا در فعال‌سازی رویداد');
     }
   };
 
@@ -47,6 +59,7 @@ const Events = () => {
               <tr className="bg-gray-200">
                 <th className="p-3 text-right">نام</th>
                 <th className="p-3 text-right">توضیحات</th>
+                <th className="p-3 text-right">اقدامات</th>
               </tr>
             </thead>
             <tbody>
@@ -56,8 +69,19 @@ const Events = () => {
                   onClick={() => navigate(`/events/${event.id}`)}
                   className="border-t hover:bg-gray-50 cursor-pointer"
                 >
-                  <td className="p-3">{event.name}</td>
+                  <td className="p-3">{event.subject || 'بدون عنوان'}</td>
                   <td className="p-3">{event.description || 'بدون توضیحات'}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEventActivity(event.id);
+                      }}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      فعال‌سازی
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

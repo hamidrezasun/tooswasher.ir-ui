@@ -3,8 +3,8 @@ import { css } from '@emotion/react';
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getCategoryById, getProducts } from '../api/api';
-import {containerStyles} from './style';
+import { getCategoryById, getProducts, addToCart } from '../api/api';
+import { containerStyles } from './style';
 
 const CategoryProducts = () => {
   const { categoryId } = useParams();
@@ -13,27 +13,33 @@ const CategoryProducts = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    Promise.all([getCategoryById(categoryId), getProducts()])
-      .then(([catData, prodData]) => {
+    const fetchData = async () => {
+      try {
+        const [catData, prodData] = await Promise.all([getCategoryById(categoryId), getProducts()]);
         setCategory(catData);
         setProducts(prodData.filter((p) => p.category_id === parseInt(categoryId)));
-      })
-      .catch((err) => setError(err.message || 'خطا در بارگذاری'));
+      } catch (err) {
+        setError(err.message || 'خطا در بارگذاری');
+      }
+    };
+    fetchData();
   }, [categoryId]);
 
   const handleAddToCart = async (product) => {
     try {
       await addToCart(product.id, product.minimum_order || 1);
-      alert(`${product.name} به سبد خرید اضافه شد`);
+      setError('محصول به سبد خرید اضافه شد!');
+      setTimeout(() => setError(null), 3000); // Temporary message
     } catch (err) {
       setError(err.message || 'خطا در افزودن به سبد خرید');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
   const calculateDiscountedPrice = (price, discount) =>
     discount?.percent ? Math.round(price * (1 - discount.percent / 100)) : price;
 
-  if (error) return <div className="text-center text-red-500 mt-20">{error}</div>;
+  if (error && !error.includes('اضافه شد')) return <div className="text-center text-red-500 mt-20">{error}</div>;
   if (!category) return <div className="text-center mt-20">در حال بارگذاری...</div>;
 
   return (
@@ -90,6 +96,7 @@ const CategoryProducts = () => {
           );
         })}
       </div>
+      {error && error.includes('اضافه شد') && <div className="text-center text-green-500 mt-4">{error}</div>}
     </div>
   );
 };

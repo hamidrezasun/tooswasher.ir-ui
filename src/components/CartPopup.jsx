@@ -9,12 +9,17 @@ const CartPopup = ({ onClose }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    getCart()
-      .then((data) => {
-        console.log('Cart data:', data);
-        setCart(data);
-      })
-      .catch((err) => setError(err.message || 'خطا در بارگذاری سبد خرید'));
+    const fetchCart = async () => {
+      try {
+        const data = await getCart();
+        console.log('Fetched cart data:', data); // Debug the API response
+        setCart(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message || 'خطا در بارگذاری سبد خرید');
+        console.error('Cart fetch error:', err.response?.data);
+      }
+    };
+    fetchCart();
   }, []);
 
   if (error) return <div className="text-red-500 text-center">{error}</div>;
@@ -31,9 +36,13 @@ const CartPopup = ({ onClose }) => {
               <li key={item.id} className="flex justify-between items-center">
                 <span>{item.product?.name || 'محصول نامشخص'}</span>
                 <span>
+                  {item.quantity} ×{' '}
                   {item.product?.price
                     ? `${item.product.price.toLocaleString()} تومان`
                     : 'قیمت نامشخص'}
+                </span>
+                <span className="ml-4">
+                  {(item.quantity * (item.product?.price || 0)).toLocaleString()} تومان
                 </span>
               </li>
             ))}

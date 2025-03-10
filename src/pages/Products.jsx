@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getProducts } from '../api/api';
-import {containerStyles} from './style';
+import { containerStyles } from './style';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -37,7 +37,11 @@ const Products = () => {
                 className="w-full h-40 object-cover rounded-md mb-4"
               />
               <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
-              <p className="text-gray-600">{product.description || 'بدون توضیحات'}</p>
+              {product.discount?.percent ? (
+                <p className="text-green-600 mb-2">
+                  تخفیف: {product.discount.percent}% ({(product.price * (product.discount.percent / 100)).toLocaleString()} تومان)
+                </p>
+              ) : null}
               <p className="text-indigo-600 font-bold mt-2">{product.price} تومان</p>
             </Link>
           ))}

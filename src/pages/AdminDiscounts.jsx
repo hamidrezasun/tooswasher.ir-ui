@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getDiscounts, createDiscount, updateDiscount, deleteDiscount, getUserProfile } from '../api/api';
 import { isAuthenticated } from '../api/auth';
-import {containerStyles} from './style';
+import { containerStyles } from './style';
 
 const AdminDiscounts = () => {
   const [discounts, setDiscounts] = useState([]);
@@ -22,7 +22,7 @@ const AdminDiscounts = () => {
           setIsAdmin(user.role === 'admin');
         }
         const data = await getDiscounts();
-        setDiscounts(data);
+        setDiscounts(data || []);
       } catch (err) {
         setError(err.message || 'خطا در بارگذاری تخفیف‌ها');
       }
@@ -35,8 +35,8 @@ const AdminDiscounts = () => {
       const discount = await createDiscount({
         ...newDiscount,
         percent: parseFloat(newDiscount.percent),
-        max_discount: parseFloat(newDiscount.max_discount),
-        product_id: parseInt(newDiscount.product_id),
+        max_discount: parseFloat(newDiscount.max_discount) || 0,
+        product_id: parseInt(newDiscount.product_id) || null,
       });
       setDiscounts([...discounts, discount]);
       setNewDiscount({ code: '', percent: '', max_discount: '', product_id: '' });
@@ -50,8 +50,8 @@ const AdminDiscounts = () => {
       const updated = await updateDiscount(editingDiscount.id, {
         ...editingDiscount,
         percent: parseFloat(editingDiscount.percent),
-        max_discount: parseFloat(editingDiscount.max_discount),
-        product_id: parseInt(editingDiscount.product_id),
+        max_discount: parseFloat(editingDiscount.max_discount) || 0,
+        product_id: parseInt(editingDiscount.product_id) || null,
       });
       setDiscounts(discounts.map((d) => (d.id === updated.id ? updated : d)));
       setEditingDiscount(null);
@@ -86,36 +86,44 @@ const AdminDiscounts = () => {
               type="text"
               placeholder="کد تخفیف"
               value={editingDiscount ? editingDiscount.code : newDiscount.code}
-              onChange={(e) => editingDiscount
-                ? setEditingDiscount({ ...editingDiscount, code: e.target.value })
-                : setNewDiscount({ ...newDiscount, code: e.target.value })}
+              onChange={(e) =>
+                editingDiscount
+                  ? setEditingDiscount({ ...editingDiscount, code: e.target.value })
+                  : setNewDiscount({ ...newDiscount, code: e.target.value })
+              }
               className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <input
               type="number"
               placeholder="درصد تخفیف"
               value={editingDiscount ? editingDiscount.percent : newDiscount.percent}
-              onChange={(e) => editingDiscount
-                ? setEditingDiscount({ ...editingDiscount, percent: e.target.value })
-                : setNewDiscount({ ...newDiscount, percent: e.target.value })}
+              onChange={(e) =>
+                editingDiscount
+                  ? setEditingDiscount({ ...editingDiscount, percent: e.target.value })
+                  : setNewDiscount({ ...newDiscount, percent: e.target.value })
+              }
               className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <input
               type="number"
               placeholder="حداکثر تخفیف"
               value={editingDiscount ? editingDiscount.max_discount : newDiscount.max_discount}
-              onChange={(e) => editingDiscount
-                ? setEditingDiscount({ ...editingDiscount, max_discount: e.target.value })
-                : setNewDiscount({ ...newDiscount, max_discount: e.target.value })}
+              onChange={(e) =>
+                editingDiscount
+                  ? setEditingDiscount({ ...editingDiscount, max_discount: e.target.value })
+                  : setNewDiscount({ ...newDiscount, max_discount: e.target.value })
+              }
               className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <input
               type="number"
               placeholder="شناسه محصول"
               value={editingDiscount ? editingDiscount.product_id : newDiscount.product_id}
-              onChange={(e) => editingDiscount
-                ? setEditingDiscount({ ...editingDiscount, product_id: e.target.value })
-                : setNewDiscount({ ...newDiscount, product_id: e.target.value })}
+              onChange={(e) =>
+                editingDiscount
+                  ? setEditingDiscount({ ...editingDiscount, product_id: e.target.value })
+                  : setNewDiscount({ ...newDiscount, product_id: e.target.value })
+              }
               className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -150,8 +158,8 @@ const AdminDiscounts = () => {
                 <tr key={discount.id} className="border-t hover:bg-gray-50">
                   <td className="p-3">{discount.code}</td>
                   <td className="p-3">{discount.percent}%</td>
-                  <td className="p-3">{discount.max_discount.toLocaleString()} تومان</td>
-                  <td className="p-3">{discount.product_id}</td>
+                  <td className="p-3">{discount.max_discount ? discount.max_discount.toLocaleString() : 'N/A'} تومان</td>
+                  <td className="p-3">{discount.product_id || 'N/A'}</td>
                   <td className="p-3 flex space-x-2">
                     <button
                       onClick={() => setEditingDiscount(discount)}

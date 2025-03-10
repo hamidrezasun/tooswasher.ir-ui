@@ -3,9 +3,10 @@ import { css } from '@emotion/react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import ProductPopup from '../components/ProductPopup'; // Import ProductPopup
 import { getProductById, addToCart, updateProduct, deleteProduct, getUserProfile } from '../api/api';
 import { isAuthenticated } from '../api/auth';
-import {containerStyles} from './style';
+import { containerStyles } from './style';
 
 const Product = () => {
   const { productId } = useParams();
@@ -13,6 +14,7 @@ const Product = () => {
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+  const [showEditPopup, setShowEditPopup] = useState(false); // State for popup visibility
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,9 +36,11 @@ const Product = () => {
     if (!product) return;
     try {
       await addToCart(product.id, product.minimum_order || 1);
-      alert(`${product.name} به سبد خرید اضافه شد`);
+      setError('محصول به سبد خرید اضافه شد!');
+      setTimeout(() => setError(null), 3000);
     } catch (err) {
       setError(err.message || 'خطا در افزودن به سبد خرید');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -44,7 +48,6 @@ const Product = () => {
     if (window.confirm('آیا مطمئن هستید؟')) {
       try {
         await deleteProduct(product.id);
-        alert('محصول حذف شد');
         navigate('/products');
       } catch (err) {
         setError(err.message || 'خطا در حذف محصول');
@@ -52,10 +55,20 @@ const Product = () => {
     }
   };
 
+  const handleSaveProduct = async (data) => {
+    try {
+      const updated = await updateProduct(productId, data);
+      setProduct(updated);
+      setShowEditPopup(false); // Close popup after save
+    } catch (err) {
+      setError(err.message || 'خطا در به‌روزرسانی محصول');
+    }
+  };
+
   const calculateDiscountedPrice = (price, discount) =>
     discount?.percent ? Math.round(price * (1 - discount.percent / 100)) : price;
 
-  if (error) return <div className="text-center text-red-500 mt-20">{error}</div>;
+  if (error && !error.includes('اضافه شد')) return <div className="text-center text-red-500 mt-20">{error}</div>;
   if (!product) return <div className="text-center mt-20">در حال بارگذاری...</div>;
 
   const discountedPrice = calculateDiscountedPrice(product.price, product.discount);
@@ -93,7 +106,7 @@ const Product = () => {
             {isAdmin && (
               <div className="mt-4 flex space-x-2">
                 <button
-                  onClick={() => navigate(`/admin/products/edit/${product.id}`)}
+                  onClick={() => setShowEditPopup(true)} // Open popup instead of navigating
                   className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
                 >
                   ویرایش
@@ -106,8 +119,19 @@ const Product = () => {
                 </button>
               </div>
             )}
+            {error && error.includes('اضافه شد') && (
+              <div className="mt-4 text-green-500">{error}</div>
+            )}
           </div>
         </div>
+        {showEditPopup && product && (
+          <ProductPopup
+            product={product}
+            onSave={handleSaveProduct}
+            onDelete={handleDelete}
+            onClose={() => setShowEditPopup(false)}
+          />
+        )}
       </div>
     </div>
   );

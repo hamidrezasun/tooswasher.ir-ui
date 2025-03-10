@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import ProductPopup from '../components/ProductPopup';
 import { getProducts, createProduct, updateProduct, deleteProduct, getUserProfile } from '../api/api';
 import { isAuthenticated } from '../api/auth';
-import {containerStyles} from './style';
+import { containerStyles } from './style';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -23,7 +23,7 @@ const AdminProducts = () => {
           setIsAdmin(user.role === 'admin');
         }
         const data = await getProducts();
-        setProducts(data);
+        setProducts(data || []);
       } catch (err) {
         setError(err.message || 'خطا در بارگذاری');
       }
@@ -34,8 +34,8 @@ const AdminProducts = () => {
   const handleSaveProduct = async (data) => {
     try {
       if (selectedProduct) {
-        await updateProduct(selectedProduct.id, data);
-        setProducts(products.map((p) => (p.id === selectedProduct.id ? { ...p, ...data } : p)));
+        const updated = await updateProduct(selectedProduct.id, data);
+        setProducts(products.map((p) => (p.id === updated.id ? updated : p)));
       } else {
         const newProduct = await createProduct(data);
         setProducts([...products, newProduct]);
@@ -46,7 +46,7 @@ const AdminProducts = () => {
       setError(err.message || 'خطا در ذخیره محصول');
     }
   };
-
+  
   const handleDeleteProduct = async (id) => {
     if (window.confirm('آیا مطمئن هستید؟')) {
       try {
@@ -88,14 +88,29 @@ const AdminProducts = () => {
               {products.map((product) => (
                 <tr
                   key={product.id}
-                  onClick={() => setSelectedProduct(product)}
                   className="border-t hover:bg-gray-50 cursor-pointer"
+                  onClick={() => setSelectedProduct(product)}
                 >
                   <td className="p-3">{product.name}</td>
                   <td className="p-3">{product.price.toLocaleString()} تومان</td>
                   <td className="p-3">
-                    <button className="text-blue-500 hover:underline" onClick={(e) => e.stopPropagation()}>
-                      ویرایش
+                    <button
+                      className="text-blue-500 hover:underline mr-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProduct(product);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="text-red-500 hover:underline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteProduct(product.id);
+                      }}
+                    >
+                      Remove
                     </button>
                   </td>
                 </tr>
@@ -104,18 +119,15 @@ const AdminProducts = () => {
           </table>
         </div>
       </div>
-      {selectedProduct && (
+      {(selectedProduct || showAddPopup) && (
         <ProductPopup
           product={selectedProduct}
           onSave={handleSaveProduct}
-          onDelete={handleDeleteProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
-      {showAddPopup && (
-        <ProductPopup
-          onSave={handleSaveProduct}
-          onClose={() => setShowAddPopup(false)}
+          onDelete={selectedProduct ? handleDeleteProduct : null}
+          onClose={() => {
+            setSelectedProduct(null);
+            setShowAddPopup(false);
+          }}
         />
       )}
     </div>

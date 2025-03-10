@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getPages } from '../api/api';
-import {containerStyles} from './style';
+import { containerStyles } from './style';
 
 const Pages = () => {
   const { pageName } = useParams();
@@ -12,17 +12,28 @@ const Pages = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    getPages()
-      .then((pages) => {
+    const fetchPageData = async () => {
+      try {
+        const pages = await getPages();
         const decodedPageName = decodeURIComponent(pageName);
         console.log('Decoded page name from URL:', decodedPageName);
         console.log('All pages from API:', pages);
         const foundPage = pages.find((p) => p.name.replace(/\s+/g, '-') === decodedPageName);
-        console.log('Found page:', foundPage);
-        if (foundPage) setPage(foundPage);
-        else setError('صفحه یافت نشد');
-      })
-      .catch((err) => setError(err.message || 'خطا در بارگذاری صفحه'));
+        console.log('Found page from list:', foundPage);
+        if (foundPage) {
+          // Fetch the full page with body using the page ID
+          const fullPage = await (await fetch(`http://192.168.1.37:8000/pages/${foundPage.id}/`)).json();
+          console.log('Full page with body:', fullPage);
+          setPage(fullPage);
+        } else {
+          setError('صفحه یافت نشد');
+        }
+      } catch (err) {
+        setError(err.message || 'خطا در بارگذاری صفحه');
+        console.error('Error fetching page:', err);
+      }
+    };
+    fetchPageData();
   }, [pageName]);
 
   if (error) return <div className="text-center text-red-500 mt-20">{error}</div>;
@@ -37,7 +48,6 @@ const Pages = () => {
           className="text-gray-600"
           dangerouslySetInnerHTML={{ __html: page.body || '<p>محتوایی برای این صفحه تعریف نشده است.</p>' }}
         />
-        {/* Temporary content for scrolling */}
         {Array(20).fill().map((_, index) => (
           <p key={index} className="text-gray-600 mt-4">
             این یک متن آزمایشی برای تست اسکرول است.
