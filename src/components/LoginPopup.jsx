@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import { useState } from 'react';
-import { loginForAccessToken } from '../api/api';
+import { loginForAccessToken,setAuthToken  } from '../api/api';
 import { saveToken } from '../api/auth';
 
 const popupStyles = css`
@@ -40,6 +40,7 @@ const LoginPopup = ({ onClose, setIsRegisterOpen, onLoginSuccess }) => {
       formData.append('grant_type', 'password'); // Ensure this matches your server
       const data = await loginForAccessToken(formData);
       saveToken(data.access_token);
+      setAuthToken(data.access_token);
       console.log('Login response:', data); // Debug the response
       if (data.access_token) {
         onLoginSuccess(); // Trigger navbar update

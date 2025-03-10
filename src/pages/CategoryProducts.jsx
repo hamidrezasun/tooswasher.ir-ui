@@ -9,6 +9,7 @@ import { containerStyles } from './style';
 const CategoryProducts = () => {
   const { categoryId } = useParams();
   const [category, setCategory] = useState(null);
+  const [subcategories, setSubcategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
 
@@ -17,7 +18,21 @@ const CategoryProducts = () => {
       try {
         const [catData, prodData] = await Promise.all([getCategoryById(categoryId), getProducts()]);
         setCategory(catData);
-        setProducts(prodData.filter((p) => p.category_id === parseInt(categoryId)));
+
+        // If the category has no parent ID, fetch its subcategories and their products
+        if (!catData.parent_id) {
+          const subcats = catData.subcategories || [];
+          setSubcategories(subcats);
+
+          // Fetch products for each subcategory
+          const subcatProducts = subcats.flatMap((sub) =>
+            prodData.filter((p) => p.category_id === sub.id)
+          );
+          setProducts(subcatProducts);
+        } else {
+          // If the category has a parent ID, show only its own products
+          setProducts(prodData.filter((p) => p.category_id === parseInt(categoryId)));
+        }
       } catch (err) {
         setError(err.message || 'خطا در بارگذاری');
       }
@@ -46,11 +61,13 @@ const CategoryProducts = () => {
     <div css={containerStyles}>
       <Navbar />
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">{category.name}</h1>
-      {category.subcategories?.length > 0 && (
+
+      {/* Show subcategories if the category has no parent ID */}
+      {!category.parent_id && subcategories.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-2 text-gray-700">زیرمجموعه‌ها</h2>
           <div className="flex flex-wrap gap-2">
-            {category.subcategories.map((sub) => (
+            {subcategories.map((sub) => (
               <Link
                 key={sub.id}
                 to={`/categories/${sub.id}`}
@@ -62,6 +79,8 @@ const CategoryProducts = () => {
           </div>
         </div>
       )}
+
+      {/* Show products */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => {
           const discountedPrice = calculateDiscountedPrice(product.price, product.discount);
@@ -96,6 +115,8 @@ const CategoryProducts = () => {
           );
         })}
       </div>
+
+      {/* Success message for adding to cart */}
       {error && error.includes('اضافه شد') && <div className="text-center text-green-500 mt-4">{error}</div>}
     </div>
   );

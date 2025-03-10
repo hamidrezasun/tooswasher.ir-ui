@@ -8,14 +8,13 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-const setAuthToken = (token) => {
+export const setAuthToken = (token) => {
   if (token) api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   else delete api.defaults.headers.common['Authorization'];
 };
 
 const token = getToken();
 if (token) setAuthToken(token);
-
 export const loginForAccessToken = async (formData) => (await api.post('/users/token', formData, {
   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 })).data;
