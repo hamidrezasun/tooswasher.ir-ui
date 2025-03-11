@@ -20,7 +20,7 @@ const Products = () => {
   if (!products.length) return <div className="text-center mt-20">در حال بارگذاری...</div>;
 
   return (
-    <div css={containerStyles} className="debug-border">
+    <div css={containerStyles}>
       <Navbar />
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">محصولات</h1>

@@ -26,9 +26,11 @@ const CategoryProducts = () => {
 
           // Fetch products for each subcategory
           const subcatProducts = subcats.flatMap((sub) =>
-            prodData.filter((p) => p.category_id === sub.id)
+            prodData.filter((p) => p.category_id === sub.id),
           );
-          setProducts(subcatProducts);
+          const categoryProducts = prodData.filter((p) => p.category_id === parseInt(categoryId));
+
+          setProducts([...subcatProducts, ...categoryProducts]);
         } else {
           // If the category has a parent ID, show only its own products
           setProducts(prodData.filter((p) => p.category_id === parseInt(categoryId)));
