@@ -5,7 +5,7 @@ const API_URL = 'https://api.tooswasher.com'; // Adjust if needed
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'application/json','accept': 'application/json' },
 });
 
 api.interceptors.request.use(
@@ -89,7 +89,7 @@ export const deleteCategory = async (id) => await api.delete(`/categories/${id}`
 
 // --- Page Endpoints ---
 export const getPages = async () => (await api.get('/pages/')).data; // GET /pages/ - Get all pages
-export const getPageById = async (id) => (await api.get(`/pages/${id}/`)).data; // GET /pages/{page_id} - Get page by ID
+export const getPageById = async (id) => (await api.get(`/pages/${id}`)).data; // GET /pages/{page_id} - Get page by ID
 export const createPage = async (data) => (await api.post('/pages/', data)).data; // POST /pages/ - Create a page (admin only)
 export const updatePage = async (id, data) => (await api.put(`/pages/${id}`, data)).data; // PUT /pages/{page_id} - Update a page (admin only)
 export const deletePage = async (id) => await api.delete(`/pages/${id}`); // DELETE /pages/{page_id} - Delete a page (admin only)
