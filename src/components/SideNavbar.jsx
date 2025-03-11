@@ -1,6 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getUserProfile } from '../api/api';
+import { isAuthenticated } from '../api/auth';
 
 const sideNavbarStyles = css`
   position: fixed;
@@ -20,6 +23,22 @@ const sideNavbarStyles = css`
 `;
 
 const SideNavbar = ({ onClose }) => {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (isAuthenticated()) {
+        try {
+          const user = await getUserProfile();
+          setIsAdmin(user.role === 'admin');
+        } catch (err) {
+          console.error('Error fetching user role:', err);
+        }
+      }
+    };
+    fetchUserRole();
+  }, []);
+
   return (
     <div css={sideNavbarStyles} className="open">
       <div className="p-4">
@@ -44,6 +63,13 @@ const SideNavbar = ({ onClose }) => {
               رویدادها
             </Link>
           </li>
+          {isAdmin && (
+            <li>
+              <Link to="/admin/users" onClick={onClose} className="text-indigo-600 hover:underline">
+                مدیریت کاربران
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </div>

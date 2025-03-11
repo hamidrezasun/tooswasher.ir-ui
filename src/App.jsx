@@ -8,12 +8,14 @@ import AdminProducts from './pages/AdminProducts';
 import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
 import Pages from './pages/Pages';
+import AdminUsers from './pages/AdminUsers';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:productId" element={<Product />} />
         <Route path="/categories/:categoryId" element={<CategoryProducts />} />

@@ -33,6 +33,7 @@ const ProductPopup = ({ product, onSave, onDelete, onClose }) => {
       description: '',
       image: '',
       category_id: '',
+      stock: '',
       rate: '',
       minimum_order: '',
     }
@@ -47,27 +48,50 @@ const ProductPopup = ({ product, onSave, onDelete, onClose }) => {
         const data = await getCategories();
         setCategories(data);
         if (product?.category_id) {
-          setFormData((prev) => ({ ...prev, category_id: product.category_id }));
+          setFormData((prev) => ({ ...prev, category_id: product.category_id.toString() }));
+        }
+        if (product?.stock) {
+          setFormData((prev) => ({ ...prev, stock: product.stock.toString() }));
         }
       } catch (err) {
         setError(err.message || 'خطا در بارگذاری دسته‌بندی‌ها');
       }
     };
     fetchCategories();
-  }, [product?.category_id]);
+  }, [product]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!formData.name) {
+      setError('نام محصول الزامی است');
+      return;
+    }
+    if (!formData.price || isNaN(parseFloat(formData.price))) {
+      setError('قیمت باید یک عدد معتبر باشد');
+      return;
+    }
+    if (!formData.stock || isNaN(parseInt(formData.stock))) {
+      setError('موجودی (stock) باید یک عدد معتبر باشد');
+      return;
+    }
     if (!formData.category_id) {
       setError('لطفاً یک دسته‌بندی انتخاب کنید');
       return;
     }
-    onSave({
-      ...formData,
-      price: formData.price ? parseFloat(formData.price) : '',
+
+    const preparedData = {
+      name: formData.name,
+      price: parseFloat(formData.price),
+      stock: parseInt(formData.stock),
+      category_id: parseInt(formData.category_id),
+      description: formData.description || null,
+      image: formData.image || null,
       rate: formData.rate ? parseFloat(formData.rate) : null,
       minimum_order: formData.minimum_order ? parseInt(formData.minimum_order) : 1,
-    });
+    };
+
+    onSave(preparedData);
   };
 
   const filteredCategories = categories.filter((cat) =>
@@ -88,6 +112,7 @@ const ProductPopup = ({ product, onSave, onDelete, onClose }) => {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full p-2 mb-4 border rounded"
+            required
           />
           <input
             type="number"
@@ -96,6 +121,15 @@ const ProductPopup = ({ product, onSave, onDelete, onClose }) => {
             value={formData.price}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             className="w-full p-2 mb-4 border rounded"
+            required
+          />
+          <input
+            type="number"
+            placeholder="موجودی (stock)"
+            value={formData.stock}
+            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+            className="w-full p-2 mb-4 border rounded"
+            required
           />
           <input
             type="text"
@@ -137,6 +171,7 @@ const ProductPopup = ({ product, onSave, onDelete, onClose }) => {
             value={formData.category_id}
             onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
             className="w-full p-2 mb-4 border rounded"
+            required
           >
             <option value="">انتخاب دسته‌بندی</option>
             {filteredCategories.map((cat) => (
