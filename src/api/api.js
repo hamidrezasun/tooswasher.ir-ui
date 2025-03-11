@@ -64,7 +64,9 @@ export const searchUsersByName = async (name, skip = 0, limit = 100) =>
   (await api.get('/users/search-by-name/', { params: { name, skip, limit } })).data; // GET /users/search-by-name/ - Search users by name or last name (admin only)
 export const searchUsersByPhoneNumber = async (phone_number, skip = 0, limit = 100) => 
   (await api.get('/users/search-by-phone-number/', { params: { phone_number, skip, limit } })).data; // GET /users/search-by-phone-number/ - Search users by phone number (admin only)
-
+export const adminUpdateUser = async (userId, userData) => {
+  return (await api.put(`/users/${userId}/admin-update`, userData)).data;
+};
 // --- Product Endpoints ---
 export const getProducts = async () => (await api.get('/products/')).data; // GET /products/ - Get all products
 export const searchProducts = async (query, skip = 0, limit = 100) => 

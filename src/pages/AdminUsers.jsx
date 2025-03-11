@@ -10,7 +10,7 @@ import {
   searchUsersByNationalId, 
   searchUsersByName, 
   searchUsersByPhoneNumber, 
-  updateUser, 
+  adminUpdateUser, 
   deleteUser, 
   getUserProfile, 
   registerUser 
@@ -156,14 +156,18 @@ const AdminUsers = () => {
   const handleSaveUser = async () => {
     try {
       if (selectedUser) {
-        const updated = await updateUser({
+        const updated = await adminUpdateUser(selectedUser.id,{
+          username: formData.username,
           email: formData.email,
+          password: formData.password,
           name: formData.name,
           last_name: formData.last_name,
+          national_id: formData.national_id,
           address: formData.address,
           state: formData.state,
           city: formData.city,
           phone_number: formData.phone_number,
+          role: formData.role
         });
         setUsers({
           admin: users.admin.map(u => u.id === updated.id ? updated : u),
@@ -333,7 +337,6 @@ const AdminUsers = () => {
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full p-2 mb-4 border rounded"
                 required
-                disabled={!!selectedUser}
               />
               <input
                 type="email"
@@ -343,16 +346,14 @@ const AdminUsers = () => {
                 className="w-full p-2 mb-4 border rounded"
                 required={!selectedUser}
               />
-              {!selectedUser && (
-                <input
-                  type="password"
-                  placeholder="رمز عبور"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full p-2 mb-4 border rounded"
-                  required
+              <input
+                type="password"
+                placeholder="رمز عبور"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full p-2 mb-4 border rounded"
+                required
                 />
-              )}
               <input
                 type="text"
                 placeholder="نام"
